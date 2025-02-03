@@ -1,46 +1,39 @@
 #pragma once
 #include <boost/lockfree/queue.hpp>
+#include <atomic>
+#include <thread>
+#include "QueueController.h"
+#include <iostream>
+#include <string>
 
-//Klasse für Operationen bzgl. FIFO1 und FIFO2
 
-class QueueController {
+class NodeController {
 
 public:
 	
-	//Kontruktor reserviert speicher für FIFOs
-	QueueController();
 	
-	//Sendet neuen Wert an FIFO1
-	bool sendToFIFO1(int );
+	NodeController(void);
+	void run();
 
-	//Sendet neuen Wert an FIFO^2
-	bool sendToFIFO2(int );
+	////getter um Nodes status abzufragen
+	bool getNodesStatus(void) {
+		return running;
+	};
 
-	//Liest Wert aus FIFO1
-	bool readFromFIFO1(int&);
 
-	//Liest Wert aus FIFO2
-	bool readFromFIFO2(int&);
-
-	//Prüft ob FIFO1 leer ist
-	bool checkIfFIFOEmpty1(void);
-
-	//Prüft ob FIFO2 leer ist
-	bool checkIfFIFOEmpty2(void);
-
-	
-
-	//Destruktor leert die FIFOs
-	~QueueController(void);
-
+	////setter um running zu verändern
+	void setNodesStatus(bool state) {
+		running = state;
+	};
 
 private:
-	//boost::lockfree::queue Objecte werden Abgekapselt und so vor unbefugten Zugriff geschützt
-	std::unique_ptr<boost::lockfree::queue<int>> ptrF1;
-	std::unique_ptr<boost::lockfree::queue<int>> ptrF2;
+	std::atomic<bool> running; //Variable checked ob programm noch laufen soll
+	std::unique_ptr <std::thread> t1Ptr;
+	std::unique_ptr <std::thread> t2Ptr;
+	std::unique_ptr <QueueController> qPtr;
 
-	
+	void ioNode();
+	void operationNode();
 
-
-
+	bool checkForInvalidSymbols(std::string);
 };
